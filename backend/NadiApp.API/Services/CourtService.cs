@@ -1,0 +1,12 @@
+using NadiApp.API.Data;using NadiApp.API.DTOs;using NadiApp.API.Models;using Microsoft.EntityFrameworkCore;
+namespace NadiApp.API.Services;
+public interface ICourtService{Task<List<CourtResponse>>GetAllAsync();Task<CourtResponse?>GetByIdAsync(int id);Task<CourtResponse>CreateAsync(CourtUpsertRequest r);Task<CourtResponse?>UpdateAsync(int id,CourtUpsertRequest r);Task<bool>DeleteAsync(int id);Task<List<AvailabilityResponse>>AvailAsync(int courtId,string date);}
+public class CourtService(AppDbContext db):ICourtService{
+  static readonly string[]Hrs=["06:00","07:00","08:00","09:00","10:00","11:00","12:00","13:00","14:00","15:00","16:00","17:00","18:00","19:00","20:00","21:00"];
+  public async Task<List<CourtResponse>>GetAllAsync()=>(await db.Courts.Include(c=>c.Reservations).ToListAsync()).Select(D).ToList();
+  public async Task<CourtResponse?>GetByIdAsync(int id){var c=await db.Courts.Include(c=>c.Reservations).FirstOrDefaultAsync(c=>c.Id==id);return c==null?null:D(c);}
+  public async Task<CourtResponse>CreateAsync(CourtUpsertRequest r){var c=new Court{Name=r.Name,Type=r.Type,Capacity=r.Capacity,HourlyRate=r.HourlyRate,Status=r.Status,Description=r.Description};db.Courts.Add(c);await db.SaveChangesAsync();return D(c);}
+  public async Task<CourtResponse?>UpdateAsync(int id,CourtUpsertRequest r){var c=await db.Courts.FindAsync(id);if(c==null)return null;c.Name=r.Name;c.Type=r.Type;c.Capacity=r.Capacity;c.HourlyRate=r.HourlyRate;c.Status=r.Status;c.Description=r.Description;await db.SaveChangesAsync();return D(c);}
+  public async Task<bool>DeleteAsync(int id){var c=await db.Courts.FindAsync(id);if(c==null)return false;db.Courts.Remove(c);await db.SaveChangesAsync();return true;}
+  public async Task<List<AvailabilityResponse>>AvailAsync(int courtId,string date){var d=DateOnly.Parse(date);var booked=await db.Reservations.Where(r=>r.CourtId==courtId&&r.Date==d&&r.Status=="confirmed").Select(r=>r.StartTime.ToString("HH:mm")).ToListAsync();return Hrs.Select(h=>new AvailabilityResponse(h,!booked.Contains(h))).ToList();}
+  static CourtResponse D(Court c)=>new(c.Id,c.Name,c.Type,c.Capacity,c.HourlyRate,c.Status,c.Description,c.Reservations.Count(r=>r.Status=="confirmed"),c.Reservations.Where(r=>r.Status=="confirmed").Sum(r=>r.TotalPrice),c.CreatedAt);}
