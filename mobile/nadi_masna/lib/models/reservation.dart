@@ -67,6 +67,7 @@ class ReservationGroup {
   String get courtType    => first.courtType;
   String get courtIcon    => first.icon;
   String get userName     => first.userName;
+  bool get isPending => isPendingScreenshot || isPendingReview;
   String get userEmail    => first.userEmail;
   String get userPhone    => first.userPhone;   // ← single definition
   String get date         => first.date;

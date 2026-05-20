@@ -27,6 +27,8 @@ class _S extends State<MyBookingsScreen> with SingleTickerProviderStateMixin {
   Widget build(BuildContext ctx) {
     final rp   = ctx.watch<ResProv>();
     final dark = Theme.of(ctx).brightness == Brightness.dark;
+    final sw   = MediaQuery.of(ctx).size.width;
+    final isSmall = sw < 360;
 
     return Column(children: [
       Container(
@@ -37,14 +39,15 @@ class _S extends State<MyBookingsScreen> with SingleTickerProviderStateMixin {
           unselectedLabelColor: dark ? C.dMu : C.lMu,
           indicatorColor: C.gold,
           dividerColor: dark ? C.dBdr : C.lBdr,
-          labelStyle: GoogleFonts.tajawal(fontWeight: FontWeight.w700),
+          labelStyle: GoogleFonts.tajawal(
+            fontWeight: FontWeight.w700,
+            fontSize: isSmall ? 11 : 13),
           tabs: [
-            Tab(text: 'القادمة (${rp.upcomingGroups.length})'),
-            Tab(text: 'السابقة (${rp.pastGroups.length})'),
-            Tab(text: 'الملغاة (${rp.cancelledGroups.length})'),
+            Tab(text: "القادمة (${rp.upcomingGroups.length})"),
+            Tab(text: "السابقة (${rp.pastGroups.length})"),
+            Tab(text: "الملغاة (${rp.cancelledGroups.length})"),
           ],
-        ),
-      ),
+        )),
       Expanded(child: rp.loading
         ? const Center(child: CircularProgressIndicator(color: C.gold))
         : TabBarView(controller: _tab, children: [
@@ -67,31 +70,27 @@ class _GL extends StatelessWidget {
     final dark = Theme.of(ctx).brightness == Brightness.dark;
     if (groups.isEmpty) return Center(child: Column(
       mainAxisAlignment: MainAxisAlignment.center, children: [
-        Icon(Icons.event_busy_outlined, size: 60, color: dark ? C.dMu : C.lMu),
-        const SizedBox(height: 12),
-        Text('لا توجد حجوزات هنا',
-            style: GoogleFonts.tajawal(color: dark ? C.dMu : C.lMu, fontSize: 15)),
-      ]));
+      Icon(Icons.event_busy_outlined, size: 56, color: dark ? C.dMu : C.lMu),
+      const SizedBox(height: 12),
+      Text("لا توجد حجوزات هنا",
+        style: GoogleFonts.tajawal(color: dark ? C.dMu : C.lMu, fontSize: 15)),
+    ]));
 
     return RefreshIndicator(
       color: C.gold,
       onRefresh: () => ctx.read<ResProv>().fetch(),
       child: ListView.builder(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(14),
         itemCount: groups.length,
         itemBuilder: (_, i) {
           final g = groups[i];
-          return GroupCard(
-            g,
+          return GroupCard(g,
             showTracker: showTracker,
             onPay: g.isPendingScreenshot
               ? () => Navigator.push(ctx, MaterialPageRoute(
-                  // ✅ FIXED: use PaymentScreen.fromGroup
                   builder: (_) => PaymentScreen.fromGroup(group: g)))
               : null,
-            onCancel: g.isPendingScreenshot
-              ? () => _cancel(ctx, g)
-              : null,
+            onCancel: g.isPendingScreenshot ? () => _cancel(ctx, g) : null,
           );
         },
       ),
@@ -100,25 +99,18 @@ class _GL extends StatelessWidget {
 
   Future<void> _cancel(BuildContext ctx, ReservationGroup g) async {
     final dark = Theme.of(ctx).brightness == Brightness.dark;
-    final ok = await showDialog<bool>(
-      context: ctx,
-      builder: (_) => AlertDialog(
-        backgroundColor: dark ? C.dCard : C.lCard,
-        title: Text('إلغاء الحجز؟', style: GoogleFonts.tajawal()),
-        content: Text(
-          '${g.courtName}\n${g.date}  •  ${g.startTime} – ${g.endTime}\n'
-          '${g.hours} ${g.hours == 1 ? "ساعة" : "ساعات"}',
-          style: GoogleFonts.tajawal(color: dark ? C.dMu : C.lMu)),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false),
-              child: Text('لا', style: GoogleFonts.tajawal())),
-          TextButton(onPressed: () => Navigator.pop(ctx, true),
-              child: Text('نعم، ألغِ', style: GoogleFonts.tajawal(color: C.err))),
-        ],
-      ),
-    );
-    if (ok == true && ctx.mounted) {
-      await ctx.read<ResProv>().cancelGroup(g.groupId);
-    }
+    final ok = await showDialog<bool>(context: ctx, builder: (_) => AlertDialog(
+      backgroundColor: dark ? C.dCard : C.lCard,
+      title: Text("إلغاء الحجز؟", style: GoogleFonts.tajawal()),
+      content: Text("${g.courtName}\n${g.date}  •  ${g.startTime} – ${g.endTime}",
+        style: GoogleFonts.tajawal(color: dark ? C.dMu : C.lMu)),
+      actions: [
+        TextButton(onPressed: () => Navigator.pop(ctx, false),
+          child: Text("لا", style: GoogleFonts.tajawal())),
+        TextButton(onPressed: () => Navigator.pop(ctx, true),
+          child: Text("نعم، ألغِ", style: GoogleFonts.tajawal(color: C.err))),
+      ],
+    ));
+    if (ok == true && ctx.mounted) await ctx.read<ResProv>().cancelGroup(g.groupId);
   }
 }

@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "KtYP1O4oPJ4=",
+  "dgSpecHash": "sVdSntIthfA=",
   "success": true,
-  "projectFilePath": "H:\\nadi_club\\backend\\NadiApp.API\\NadiApp.API.csproj",
+  "projectFilePath": "H:\\Other\\AOI\\nadi_club\\backend\\NadiApp.API\\NadiApp.API.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\Ahmed\\.nuget\\packages\\azure.core\\1.25.0\\azure.core.1.25.0.nupkg.sha512",
     "C:\\Users\\Ahmed\\.nuget\\packages\\azure.identity\\1.7.0\\azure.identity.1.7.0.nupkg.sha512",

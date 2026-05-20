@@ -62,7 +62,8 @@ class _BookScreenState extends State<BookScreen> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => context.read<CourtProv>().fetch());
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => context.read<CourtProv>().fetch());
   }
 
   void _reset() => setState(() {
@@ -71,28 +72,30 @@ class _BookScreenState extends State<BookScreen> {
 
   @override
   Widget build(BuildContext ctx) {
-    final dark = Theme.of(ctx).brightness == Brightness.dark;
+    final dark    = Theme.of(ctx).brightness == Brightness.dark;
+    final sw      = MediaQuery.of(ctx).size.width;
+    final isSmall = sw < 360;
 
-    // Done — go to payment
     if (_step == 4 && _booked.isNotEmpty) {
       return _DoneView(
         reservations: _booked,
         onPay: () => Navigator.push(ctx, MaterialPageRoute(
-          // ✅ FIXED: use PaymentScreen.fromGroup with ReservationGroup
           builder: (_) => PaymentScreen.fromGroup(group: ReservationGroup(_booked))))
             .then((_) => _reset()),
         onAnother: _reset,
       );
     }
 
-    final steps = ['اختر الملعب', 'اختر التاريخ', 'اختر الوقت والمدة', 'تأكيد الحجز'];
+    final steps = ['اختر الملعب','اختر التاريخ','اختر الوقت والمدة','تأكيد الحجز'];
 
     return Column(children: [
+      // ── Progress header ────────────────────────────────────────────────────
       Container(
         color: dark ? C.dSurf : C.lSurf,
-        padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
+        padding: EdgeInsets.fromLTRB(isSmall ? 12 : 16, 14, isSmall ? 12 : 16, 10),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text('حجز ملعب', style: GoogleFonts.tajawal(fontSize: 22, fontWeight: FontWeight.w800, color: C.gold)),
+          Text('حجز ملعب', style: GoogleFonts.tajawal(
+            fontSize: isSmall ? 18 : 22, fontWeight: FontWeight.w800, color: C.gold)),
           const SizedBox(height: 10),
           Row(children: List.generate(4, (i) => Expanded(child: Container(
             height: 4, margin: const EdgeInsets.symmetric(horizontal: 2),
@@ -101,12 +104,13 @@ class _BookScreenState extends State<BookScreen> {
               borderRadius: BorderRadius.circular(2)))))),
           const SizedBox(height: 6),
           Text('الخطوة ${_step+1} من 4 – ${steps[_step.clamp(0,3)]}',
-            style: GoogleFonts.tajawal(color: dark ? C.dMu : C.lMu, fontSize: 12)),
+            style: GoogleFonts.tajawal(
+              color: dark ? C.dMu : C.lMu, fontSize: isSmall ? 11 : 12)),
         ]),
       ),
 
       Expanded(child: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(isSmall ? 12 : 16),
         child: Column(children: [
           if (_step == 0) _Step1(onSel: (c) { setState(() { _court = c; _step = 1; }); }),
           if (_step == 1) _Step2(
@@ -117,7 +121,8 @@ class _BookScreenState extends State<BookScreen> {
                 firstDate: DateTime.now(),
                 lastDate: DateTime.now().add(const Duration(days: 60)),
                 builder: (c, w) => Theme(
-                  data: Theme.of(c).copyWith(colorScheme: const ColorScheme.dark(primary: C.gold, surface: C.dCard)),
+                  data: Theme.of(c).copyWith(
+                    colorScheme: const ColorScheme.dark(primary: C.gold, surface: C.dCard)),
                   child: w!));
               if (d != null) {
                 setState(() { _date = d; _startTime = null; _hours = 1; });
@@ -165,6 +170,7 @@ class _BookScreenState extends State<BookScreen> {
   }
 }
 
+// ── Step 1 ────────────────────────────────────────────────────────────────────
 class _Step1 extends StatelessWidget {
   final void Function(Court) onSel;
   const _Step1({required this.onSel});
@@ -177,37 +183,40 @@ class _Step1 extends StatelessWidget {
   }
 }
 
+// ── Step 2 ────────────────────────────────────────────────────────────────────
 class _Step2 extends StatelessWidget {
-  final Court court;
-  final DateTime date;
+  final Court court; final DateTime date;
   final VoidCallback onPickDate, onBack;
-  const _Step2({required this.court, required this.date, required this.onPickDate, required this.onBack});
-
+  const _Step2({required this.court, required this.date,
+    required this.onPickDate, required this.onBack});
   @override
   Widget build(BuildContext ctx) {
-    final dark = Theme.of(ctx).brightness == Brightness.dark;
+    final dark    = Theme.of(ctx).brightness == Brightness.dark;
+    final isSmall = MediaQuery.of(ctx).size.width < 360;
     return Column(children: [
       CourtCard(court, sel: true),
       const SizedBox(height: 16),
       Container(
         decoration: BoxDecoration(color: dark ? C.dCard : C.lCard,
-          borderRadius: BorderRadius.circular(16), border: Border.all(color: dark ? C.dBdr : C.lBdr)),
-        padding: const EdgeInsets.all(20),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: dark ? C.dBdr : C.lBdr)),
+        padding: EdgeInsets.all(isSmall ? 16 : 20),
         child: Column(children: [
           const Icon(Icons.calendar_month_outlined, color: C.gold, size: 44),
           const SizedBox(height: 10),
           Text('متى تريد اللعب؟', style: GoogleFonts.tajawal(
-            fontWeight: FontWeight.w700, fontSize: 16, color: dark ? C.dTx : C.lTx)),
+            fontWeight: FontWeight.w700, fontSize: isSmall ? 14 : 16,
+            color: dark ? C.dTx : C.lTx)),
           const SizedBox(height: 6),
           Text('${date.day}/${date.month}/${date.year}',
-            style: GoogleFonts.tajawal(color: C.gold, fontSize: 18, fontWeight: FontWeight.w700)),
+            style: GoogleFonts.tajawal(color: C.gold,
+              fontSize: isSmall ? 16 : 18, fontWeight: FontWeight.w700)),
           const SizedBox(height: 16),
           GoldBtn(text: 'اختر التاريخ', onTap: onPickDate, icon: Icons.date_range),
         ]),
       ),
       const SizedBox(height: 12),
-      OutlinedButton(
-        onPressed: onBack,
+      OutlinedButton(onPressed: onBack,
         style: OutlinedButton.styleFrom(
           minimumSize: const Size(double.infinity, 48),
           side: BorderSide(color: dark ? C.dBdr : C.lBdr),
@@ -217,6 +226,7 @@ class _Step2 extends StatelessWidget {
   }
 }
 
+// ── Step 3 ────────────────────────────────────────────────────────────────────
 class _Step3 extends StatelessWidget {
   final List<SlotAvail> slots;
   final String? selTime;
@@ -235,7 +245,8 @@ class _Step3 extends StatelessWidget {
 
   @override
   Widget build(BuildContext ctx) {
-    final dark = Theme.of(ctx).brightness == Brightness.dark;
+    final dark    = Theme.of(ctx).brightness == Brightness.dark;
+    final isSmall = MediaQuery.of(ctx).size.width < 360;
     return Column(children: [
       if (isToday) ...[
         Container(
@@ -247,7 +258,7 @@ class _Step3 extends StatelessWidget {
             const Icon(Icons.access_time, color: C.info, size: 16),
             const SizedBox(width: 8),
             Expanded(child: Text('تعرض المواعيد المتاحة من الساعة القادمة فصاعداً',
-              style: GoogleFonts.tajawal(color: C.info, fontSize: 13))),
+              style: GoogleFonts.tajawal(color: C.info, fontSize: isSmall ? 11 : 13))),
           ])),
         const SizedBox(height: 12),
       ],
@@ -275,8 +286,7 @@ class _Step3 extends StatelessWidget {
             crossAxisSpacing: 8, mainAxisSpacing: 8),
           itemCount: slots.length,
           itemBuilder: (ctx, i) {
-            final s = slots[i];
-            final sel = selTime == s.hour;
+            final s = slots[i]; final sel = selTime == s.hour;
             return GestureDetector(
               onTap: s.avail ? () => onSel(s.hour) : null,
               child: AnimatedContainer(
@@ -308,27 +318,28 @@ class _Step3 extends StatelessWidget {
             color: dark ? C.dCard : C.lCard,
             borderRadius: BorderRadius.circular(14),
             border: Border.all(color: C.gold.withOpacity(0.4))),
-          padding: const EdgeInsets.all(16),
+          padding: EdgeInsets.all(isSmall ? 12 : 16),
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Row(children: [
               const Icon(Icons.timer_outlined, color: C.gold, size: 20),
               const SizedBox(width: 8),
-              Text('عدد الساعات', style: GoogleFonts.tajawal(
-                fontWeight: FontWeight.w700, fontSize: 15, color: dark ? C.dTx : C.lTx)),
-              const Spacer(),
+              Expanded(child: Text('عدد الساعات', style: GoogleFonts.tajawal(
+                fontWeight: FontWeight.w700, fontSize: isSmall ? 13 : 15,
+                color: dark ? C.dTx : C.lTx))),
               Text('$hours ${hours == 1 ? "ساعة" : "ساعات"}',
-                style: GoogleFonts.tajawal(color: C.gold, fontWeight: FontWeight.w800, fontSize: 16)),
+                style: GoogleFonts.tajawal(
+                  color: C.gold, fontWeight: FontWeight.w800,
+                  fontSize: isSmall ? 14 : 16)),
             ]),
             const SizedBox(height: 12),
             Row(children: List.generate(maxHours, (i) {
-              final h = i + 1;
-              final sel = hours == h;
+              final h = i + 1; final sel = hours == h;
               return Expanded(child: GestureDetector(
                 onTap: () => onHoursChanged(h),
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 150),
                   margin: const EdgeInsets.symmetric(horizontal: 3),
-                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  padding: EdgeInsets.symmetric(vertical: isSmall ? 8 : 10),
                   decoration: BoxDecoration(
                     color: sel ? C.gold : (dark ? C.dSurf : C.lBg),
                     borderRadius: BorderRadius.circular(10),
@@ -339,18 +350,18 @@ class _Step3 extends StatelessWidget {
                     style: GoogleFonts.tajawal(
                       color: sel ? C.dBg : (dark ? C.dTx : C.lTx),
                       fontWeight: sel ? FontWeight.w800 : FontWeight.normal,
-                      fontSize: 16))))));
+                      fontSize: isSmall ? 14 : 16))))));
             })),
             const SizedBox(height: 8),
             Center(child: Text('من $selTime إلى $endTime',
-              style: GoogleFonts.tajawal(color: dark ? C.dMu : C.lMu, fontSize: 13))),
+              style: GoogleFonts.tajawal(
+                color: dark ? C.dMu : C.lMu, fontSize: isSmall ? 11 : 13))),
           ])),
       ],
 
       const SizedBox(height: 16),
       Row(children: [
-        Expanded(child: OutlinedButton(
-          onPressed: onBack,
+        Expanded(child: OutlinedButton(onPressed: onBack,
           style: OutlinedButton.styleFrom(
             minimumSize: const Size(double.infinity, 48),
             side: BorderSide(color: dark ? C.dBdr : C.lBdr),
@@ -366,6 +377,7 @@ class _Step3 extends StatelessWidget {
   }
 }
 
+// ── Step 4 ────────────────────────────────────────────────────────────────────
 class _Step4 extends StatelessWidget {
   final Court court;
   final String date, startTime, endTime;
@@ -381,41 +393,58 @@ class _Step4 extends StatelessWidget {
   @override
   Widget build(BuildContext ctx) {
     final dark    = Theme.of(ctx).brightness == Brightness.dark;
+    final isSmall = MediaQuery.of(ctx).size.width < 360;
     final total   = court.hourlyRate * hours;
     final deposit = total * 0.25;
+
+    Widget infoRow(String label, String value) => Padding(
+      padding: const EdgeInsets.symmetric(vertical: 5),
+      child: Row(children: [
+        Flexible(flex: 2, child: Text(label, style: GoogleFonts.tajawal(
+          color: dark ? C.dMu : C.lMu, fontSize: isSmall ? 11 : 13))),
+        const SizedBox(width: 8),
+        Flexible(flex: 3, child: Text(value, style: GoogleFonts.tajawal(
+          color: dark ? C.dTx : C.lTx, fontSize: isSmall ? 11 : 13),
+          maxLines: 1, overflow: TextOverflow.ellipsis, textAlign: TextAlign.end)),
+      ]),
+    );
+
     return Column(children: [
       Container(
         decoration: BoxDecoration(
           color: C.gold.withOpacity(0.07),
           borderRadius: BorderRadius.circular(18),
           border: Border.all(color: C.gold.withOpacity(0.25))),
-        padding: const EdgeInsets.all(20),
+        padding: EdgeInsets.all(isSmall ? 14 : 20),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Text('ملخص الحجز', style: GoogleFonts.tajawal(
-            color: C.gold, fontSize: 20, fontWeight: FontWeight.w800)),
+            color: C.gold, fontSize: isSmall ? 16 : 20, fontWeight: FontWeight.w800)),
           const Divider(height: 20),
-          for (final row in [
-            ['الملعب',       '${court.icon} ${court.name}'],
-            ['النوع',        court.typeAr],
-            ['التاريخ',      date],
-            ['من',           startTime],
-            ['إلى',          endTime],
-            ['المدة',        '$hours ${hours == 1 ? "ساعة" : "ساعات"}'],
-            ['سعر الساعة',   '${court.hourlyRate.toStringAsFixed(0)} جنيه'],
-            ['إجمالي السعر', '${total.toStringAsFixed(0)} جنيه'],
-          ])
-            Padding(padding: const EdgeInsets.symmetric(vertical: 6),
-              child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-                Text(row[0], style: GoogleFonts.tajawal(color: dark ? C.dMu : C.lMu, fontSize: 13)),
-                Text(row[1], style: GoogleFonts.tajawal(color: dark ? C.dTx : C.lTx, fontSize: 13)),
-              ])),
+          infoRow('الملعب',       '${court.icon} ${court.name}'),
+          infoRow('النوع',        court.typeAr),
+          infoRow('التاريخ',      date),
+          infoRow('من',           startTime),
+          infoRow('إلى',          endTime),
+          infoRow('المدة',        '$hours ${hours == 1 ? "ساعة" : "ساعات"}'),
+          infoRow('سعر الساعة',   '${court.hourlyRate.toStringAsFixed(0)} جنيه'),
+          infoRow('إجمالي السعر', '${total.toStringAsFixed(0)} جنيه'),
           const Divider(),
-          Padding(padding: const EdgeInsets.symmetric(vertical: 6),
-            child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-              Text('الدفعة المقدمة (25%)', style: GoogleFonts.tajawal(
-                fontWeight: FontWeight.w800, fontSize: 15, color: dark ? C.dTx : C.lTx)),
-              Text('${deposit.toStringAsFixed(0)} جنيه', style: GoogleFonts.tajawal(
-                fontWeight: FontWeight.w800, fontSize: 17, color: C.gold)),
+          // Deposit row — responsive
+          Padding(padding: const EdgeInsets.symmetric(vertical: 5),
+            child: Row(children: [
+              Flexible(flex: 2, child: Text('الدفعة المقدمة (25%)',
+                style: GoogleFonts.tajawal(
+                  fontWeight: FontWeight.w800,
+                  fontSize: isSmall ? 12 : 14,
+                  color: dark ? C.dTx : C.lTx),
+                maxLines: 1, overflow: TextOverflow.ellipsis)),
+              const SizedBox(width: 8),
+              Flexible(flex: 2, child: Text('${deposit.toStringAsFixed(0)} جنيه',
+                style: GoogleFonts.tajawal(
+                  fontWeight: FontWeight.w800,
+                  fontSize: isSmall ? 14 : 17,
+                  color: C.gold),
+                textAlign: TextAlign.end, maxLines: 1)),
             ])),
           Container(
             padding: const EdgeInsets.all(10),
@@ -426,13 +455,12 @@ class _Step4 extends StatelessWidget {
               const SizedBox(width: 8),
               Expanded(child: Text(
                 'الباقي (${(total - deposit).toStringAsFixed(0)} جنيه) يُدفع عند الحضور',
-                style: GoogleFonts.tajawal(color: C.info, fontSize: 12))),
+                style: GoogleFonts.tajawal(color: C.info, fontSize: isSmall ? 11 : 12))),
             ])),
         ])),
       const SizedBox(height: 16),
       Row(children: [
-        Expanded(child: OutlinedButton(
-          onPressed: onBack,
+        Expanded(child: OutlinedButton(onPressed: onBack,
           style: OutlinedButton.styleFrom(
             minimumSize: const Size(double.infinity, 50),
             side: BorderSide(color: dark ? C.dBdr : C.lBdr),
@@ -440,12 +468,14 @@ class _Step4 extends StatelessWidget {
           child: Text('→ رجوع', style: GoogleFonts.tajawal()))),
         const SizedBox(width: 12),
         Expanded(child: GoldBtn(
-          text: 'تأكيد الحجز ←', onTap: onConfirm, loading: loading, icon: Icons.check)),
+          text: 'تأكيد الحجز ←', onTap: onConfirm,
+          loading: loading, icon: Icons.check)),
       ]),
     ]);
   }
 }
 
+// ── Done view ─────────────────────────────────────────────────────────────────
 class _DoneView extends StatelessWidget {
   final List<Reservation> reservations;
   final VoidCallback onPay, onAnother;
@@ -459,6 +489,7 @@ class _DoneView extends StatelessWidget {
     final deposit = reservations.fold(0.0, (s, r) => s + r.depositAmount);
     final end     = reservations.last.endTime;
     final dark    = Theme.of(ctx).brightness == Brightness.dark;
+    final isSmall = MediaQuery.of(ctx).size.width < 360;
 
     return Center(child: Padding(
       padding: const EdgeInsets.all(28),
@@ -469,22 +500,23 @@ class _DoneView extends StatelessWidget {
           child: const Icon(Icons.schedule, color: C.pending, size: 48)),
         const SizedBox(height: 20),
         Text('تم إنشاء الحجز!', style: GoogleFonts.tajawal(
-          fontSize: 22, fontWeight: FontWeight.w800, color: C.gold),
+          fontSize: isSmall ? 18 : 22, fontWeight: FontWeight.w800, color: C.gold),
           textAlign: TextAlign.center),
         const SizedBox(height: 8),
         Text('${main.courtName}\n${main.startTime} – $end  •  $hours ${hours == 1 ? "ساعة" : "ساعات"}',
-          style: GoogleFonts.tajawal(fontSize: 14, color: dark ? C.dMu : C.lMu),
+          style: GoogleFonts.tajawal(fontSize: isSmall ? 12 : 14, color: dark ? C.dMu : C.lMu),
           textAlign: TextAlign.center),
         const SizedBox(height: 6),
-        Text('إجمالي: ${total.toStringAsFixed(0)} جنيه  •  مقدم: ${deposit.toStringAsFixed(0)} جنيه',
-          style: GoogleFonts.tajawal(color: C.gold, fontWeight: FontWeight.w700, fontSize: 14)),
+        FittedBox(fit: BoxFit.scaleDown, child: Text(
+          'إجمالي: ${total.toStringAsFixed(0)} جنيه  •  مقدم: ${deposit.toStringAsFixed(0)} جنيه',
+          style: GoogleFonts.tajawal(
+            color: C.gold, fontWeight: FontWeight.w700, fontSize: 14))),
         const SizedBox(height: 24),
         GoldBtn(
           text: 'ادفع الآن – ${deposit.toStringAsFixed(0)} جنيه',
           onTap: onPay, icon: Icons.payment),
         const SizedBox(height: 12),
-        OutlinedButton(
-          onPressed: onAnother,
+        OutlinedButton(onPressed: onAnother,
           style: OutlinedButton.styleFrom(minimumSize: const Size(double.infinity, 48)),
           child: Text('حجز ملعب آخر', style: GoogleFonts.tajawal())),
       ])));

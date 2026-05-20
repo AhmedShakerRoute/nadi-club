@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("NadiApp.API")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+deb56879ec9c20dd3982cb7ddd2031b487a92880")]
 [assembly: System.Reflection.AssemblyProductAttribute("NadiApp.API")]
 [assembly: System.Reflection.AssemblyTitleAttribute("NadiApp.API")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

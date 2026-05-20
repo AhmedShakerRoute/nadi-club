@@ -5569,11 +5569,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "H:\\nadi_club\\backend\\NadiApp.API\\NadiApp.API.csproj",
+      "projectUniqueName": "H:\\Other\\AOI\\nadi_club\\backend\\NadiApp.API\\NadiApp.API.csproj",
       "projectName": "NadiApp.API",
-      "projectPath": "H:\\nadi_club\\backend\\NadiApp.API\\NadiApp.API.csproj",
+      "projectPath": "H:\\Other\\AOI\\nadi_club\\backend\\NadiApp.API\\NadiApp.API.csproj",
       "packagesPath": "C:\\Users\\Ahmed\\.nuget\\packages\\",
-      "outputPath": "H:\\nadi_club\\backend\\NadiApp.API\\obj\\",
+      "outputPath": "H:\\Other\\AOI\\nadi_club\\backend\\NadiApp.API\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -5592,6 +5592,7 @@
       },
       "frameworks": {
         "net8.0": {
+          "framework": "net8.0",
           "targetAlias": "net8.0",
           "projectReferences": {}
         }
@@ -5610,6 +5611,7 @@
     },
     "frameworks": {
       "net8.0": {
+        "framework": "net8.0",
         "targetAlias": "net8.0",
         "dependencies": {
           "BCrypt.Net-Next": {
